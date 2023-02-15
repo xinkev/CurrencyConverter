@@ -1,4 +1,4 @@
-package com.kyawhtetzaw
+package com.kyawhtetzaw.currency
 
 /**
  * The currency which exchange rates will be based on. This is currently stored here to reduce

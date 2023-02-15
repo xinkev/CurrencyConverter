@@ -1,9 +1,9 @@
-package com.kyawhtetzaw.currency.data.database.dao
+package com.kyawhtetzaw.currency.data.local.database.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.kyawhtetzaw.currency.data.database.model.ExchangeRateEntity
+import com.kyawhtetzaw.currency.data.local.database.model.ExchangeRateEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

@@ -1,8 +1,8 @@
-package com.kyawhtetzaw.currency.data.database.di
+package com.kyawhtetzaw.currency.data.local.database.di
 
 import android.content.Context
 import androidx.room.Room
-import com.kyawhtetzaw.currency.data.database.CurrencyDatabase
+import com.kyawhtetzaw.currency.data.local.database.CurrencyDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

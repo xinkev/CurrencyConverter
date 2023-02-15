@@ -1,4 +1,4 @@
-package com.kyawhtetzaw.currency.data.database.model
+package com.kyawhtetzaw.currency.data.local.database.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

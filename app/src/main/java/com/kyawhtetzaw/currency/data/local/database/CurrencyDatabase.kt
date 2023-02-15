@@ -1,9 +1,9 @@
-package com.kyawhtetzaw.currency.data.database
+package com.kyawhtetzaw.currency.data.local.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.kyawhtetzaw.currency.data.database.dao.ExchangeRateDao
-import com.kyawhtetzaw.currency.data.database.model.ExchangeRateEntity
+import com.kyawhtetzaw.currency.data.local.database.dao.ExchangeRateDao
+import com.kyawhtetzaw.currency.data.local.database.model.ExchangeRateEntity
 
 @Database(
     entities = [ExchangeRateEntity::class],

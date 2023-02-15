@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ExchangeRateDao {
     @Query("SELECT * FROM exchange_rates")
-    suspend fun getAll(): Flow<List<ExchangeRateEntity>>
+    fun getAll(): Flow<List<ExchangeRateEntity>>
 
     @Insert
     suspend fun insert(vararg entities: ExchangeRateEntity)

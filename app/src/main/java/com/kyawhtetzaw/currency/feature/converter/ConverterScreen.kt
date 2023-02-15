@@ -20,7 +20,7 @@ fun ConverterScreen(
     val exchangeRates by viewModel.exchangeRates.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        timer(period = Duration.ofMinutes(30L).toMillis()) {
+        timer(period = Duration.ofMinutes(30).toMillis()) {
             viewModel.updateExchangeRates()
         }
     }

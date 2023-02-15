@@ -23,7 +23,7 @@ class ConverterViewModel @Inject constructor(
 
     fun updateExchangeRates() {
         viewModelScope.launch {
-            updateExchangeRates()
+            updateExchangeRates.invoke()
         }
     }
 

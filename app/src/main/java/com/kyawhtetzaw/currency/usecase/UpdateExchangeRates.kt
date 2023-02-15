@@ -15,13 +15,15 @@ class UpdateExchangeRates @Inject constructor(
     private val dao: ExchangeRateDao
 ) {
     suspend operator fun invoke(): Result<Unit> = runCatching {
+        val now = LocalDateTime.now()
         val shouldUpdate = lastUpdateDataSource.getLastUpdateTime()?.let {
-            ChronoUnit.MINUTES.between(it, LocalDateTime.now()) >= 30
+            ChronoUnit.MINUTES.between(it, now) >= 30
         } ?: true
 
         if (shouldUpdate) {
             val networkRates = networkDataSource.latest()
             dao.insert(*networkRates.map(NetworkExchangeRate::toEntity).toTypedArray())
+            lastUpdateDataSource.saveTimestamp(now)
         }
     }
 }

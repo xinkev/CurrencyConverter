@@ -1,4 +1,4 @@
-package com.kyawhtetzaw.currency.feature.converter
+package com.kyawhtetzaw.currency.converter
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

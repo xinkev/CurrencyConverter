@@ -1,4 +1,4 @@
-package com.kyawhtetzaw.currency.feature.converter
+package com.kyawhtetzaw.currency.converter
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
@@ -15,6 +15,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kyawhtetzaw.currency.model.ExchangeRate
 import com.kyawhtetzaw.currency.ui.theme.KyawHtetZawTheme
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import java.time.Duration
 import kotlin.concurrent.timer
@@ -78,6 +79,7 @@ fun ConverterScreenLayout(
     }
 }
 
+@OptIn(FlowPreview::class)
 @Composable
 fun InputField(
     modifier: Modifier = Modifier,

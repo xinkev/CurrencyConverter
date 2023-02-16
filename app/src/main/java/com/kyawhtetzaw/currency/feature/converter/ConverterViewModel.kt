@@ -24,10 +24,20 @@ class ConverterViewModel @Inject constructor(
     private val lastUpdateDataSource: LastUpdateDataSource,
     getExchangeRates: GetExchangeRates,
 ) : ViewModel() {
-    val exchangeRates = getExchangeRates().stateIn(
+    private val inputAmount = MutableStateFlow(0.0)
+
+    private val exchangeRates = getExchangeRates().stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(500),
         emptyList()
+    )
+
+    val convertedRates = inputAmount.combine(exchangeRates) { amount, rates ->
+        rates.map { it.copy(rate = it.rate * amount.toDouble()) }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(500),
+        exchangeRates.value
     )
     private val _timer = MutableStateFlow<String?>(null)
     val timer = _timer.asStateFlow()
@@ -48,13 +58,12 @@ class ConverterViewModel @Inject constructor(
             while (true) {
                 // compares the time limit and the time passed
                 if (timePassed == null || timePassed > timeLimit) {
-                    Timber.e("Hi")
                     lastUpdateDataSource.saveTimestamp(LocalDateTime.now())
                     timePassed = 0
                     // and update exchange rates if time limit is reached
                     continue
                 } else {
-                    updateCountDown( timeLimit - timePassed)
+                    updateCountDown(timeLimit - timePassed)
                     timePassed += 1L
                     delay(1.seconds)
                 }
@@ -63,7 +72,6 @@ class ConverterViewModel @Inject constructor(
     }
 
     private fun updateCountDown(time: Long) {
-        Timber.e(time.toString())
         val min = time / 60
         val sec = time % 60
         _timer.update { ("%02d:%02d".format(min, sec)) }
@@ -75,4 +83,13 @@ class ConverterViewModel @Inject constructor(
         }
     }
 
+    fun setInputAmount(value: String) {
+        inputAmount.update { oldValue ->
+            if (value.isEmpty()) {
+                0.0
+            } else {
+                value.toDoubleOrNull()?:oldValue
+            }
+        }
+    }
 }

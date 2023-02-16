@@ -7,15 +7,19 @@ import com.kyawhtetzaw.currency.usecase.GetExchangeRates
 import com.kyawhtetzaw.currency.usecase.GetLastUpdatedTime
 import com.kyawhtetzaw.currency.usecase.UpdateExchangeRates
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
-import javax.inject.Inject
-import kotlinx.coroutines.launch
-import timber.log.Timber
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class ConverterViewModel @Inject constructor(
@@ -33,7 +37,21 @@ class ConverterViewModel @Inject constructor(
     )
 
     val convertedRates = inputAmount.combine(exchangeRates) { amount, rates ->
-        rates.map { it.copy(rate = it.rate * amount.toDouble()) }
+        if (rates.isNotEmpty()) {
+            val target = rates.first { it.symbol == "JPY" }
+            rates.map {
+                it.copy(
+                    rate = convertRate(
+                        amount = amount,
+                        rate = it.rate,
+                        targetRate = target.rate,
+                        from = it.symbol,
+                        to = target.symbol,
+                        base = "USD"
+                    )
+                )
+            }
+        } else rates
     }.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(500),
@@ -88,7 +106,7 @@ class ConverterViewModel @Inject constructor(
             if (value.isEmpty()) {
                 0.0
             } else {
-                value.toDoubleOrNull()?:oldValue
+                value.toDoubleOrNull() ?: oldValue
             }
         }
     }

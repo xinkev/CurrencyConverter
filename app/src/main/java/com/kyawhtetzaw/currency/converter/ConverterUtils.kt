@@ -1,14 +1,13 @@
 package com.kyawhtetzaw.currency.converter
 
 /**
- * e.g. from(JPY), to(SGD), base(USD)
  *
- * @param amount amount to convert in source currency(JPY)
- * @param rate base rate for source currency(JPY)
- * @param targetRate base rate for target currency(SGD)
- * @param from the currency(JPY) to convert the amount from
- * @param to the currency(SGD) to convert the amount into
- * @param base base currency(USD) is the exchange rate data in our database are based upon
+ * @param amount amount to convert
+ * @param rate exchange rate for the currency that is being converted [from]
+ * @param targetRate exchange rate for the currency that is being converted in[to]
+ * @param from the currency to convert the amount from
+ * @param to the currency to convert the amount into
+ * @param base the currency which is used to get the exchange rate data from the API. Currently, it's set to hard coded as USD. You can change it in Config.kt
  */
 fun convertRate(
     amount: Double,

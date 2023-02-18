@@ -2,7 +2,9 @@ package com.kyawhtetzaw.currency.converter
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kyawhtetzaw.currency.BaseCurrency
 import com.kyawhtetzaw.currency.data.local.preferences.LastUpdateDataSource
+import com.kyawhtetzaw.currency.model.ExchangeRate
 import com.kyawhtetzaw.currency.usecase.GetExchangeRates
 import com.kyawhtetzaw.currency.usecase.GetLastUpdatedTime
 import com.kyawhtetzaw.currency.usecase.UpdateExchangeRates
@@ -21,6 +23,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+
 @HiltViewModel
 class ConverterViewModel @Inject constructor(
     private val updateExchangeRates: UpdateExchangeRates,
@@ -30,33 +33,37 @@ class ConverterViewModel @Inject constructor(
 ) : ViewModel() {
     private val inputAmount = MutableStateFlow(0.0)
 
+    private val _selectedCurrency = MutableStateFlow<ExchangeRate?>(null)
+    val selectedCurrency = _selectedCurrency.asStateFlow()
+
     private val exchangeRates = getExchangeRates().stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(500),
         emptyList()
     )
 
-    val convertedRates = inputAmount.combine(exchangeRates) { amount, rates ->
-        if (rates.isNotEmpty()) {
-            val target = rates.first { it.symbol == "JPY" }
-            rates.map {
-                it.copy(
-                    rate = convertRate(
-                        amount = amount,
-                        rate = it.rate,
-                        targetRate = target.rate,
-                        from = it.symbol,
-                        to = target.symbol,
-                        base = "USD"
+    val convertedRates =
+        combine(inputAmount, exchangeRates, selectedCurrency) { amount, rates, source ->
+            if (rates.isNotEmpty() && source != null) {
+                val from = rates.first { it.symbol == source.symbol }
+                rates.map { to ->
+                    to.copy(
+                        rate = convertRate(
+                            amount = amount,
+                            rate = from.rate,
+                            targetRate = to.rate,
+                            from = from.symbol,
+                            to = to.symbol,
+                            base = BaseCurrency
+                        )
                     )
-                )
-            }
-        } else rates
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(500),
-        exchangeRates.value
-    )
+                }
+            } else rates
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(500),
+            exchangeRates.value
+        )
     private val _timer = MutableStateFlow<String?>(null)
     val timer = _timer.asStateFlow()
 
@@ -109,5 +116,9 @@ class ConverterViewModel @Inject constructor(
                 value.toDoubleOrNull() ?: oldValue
             }
         }
+    }
+
+    fun setSelectedCurrency(value: ExchangeRate) {
+        _selectedCurrency.update { value }
     }
 }

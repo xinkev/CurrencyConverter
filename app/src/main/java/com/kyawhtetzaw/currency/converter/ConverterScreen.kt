@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
@@ -19,10 +20,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.kyawhtetzaw.currency.ExchangeRateUpdateState
 import com.kyawhtetzaw.currency.model.ExchangeRate
+import com.kyawhtetzaw.currency.ui.icons.SuccessIcon
 import com.kyawhtetzaw.currency.ui.theme.KyawHtetZawTheme
-import java.time.Duration
-import kotlin.concurrent.timer
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 
@@ -31,31 +32,27 @@ fun ConverterScreen(
     viewModel: ConverterViewModel = viewModel()
 ) {
     val exchangeRates by viewModel.convertedRates.collectAsStateWithLifecycle()
-    val timer by viewModel.timer.collectAsStateWithLifecycle()
     val selectedCurrency by viewModel.selectedCurrency.collectAsStateWithLifecycle()
-
-    LaunchedEffect(Unit) {
-        timer(period = Duration.ofMinutes(30).toMillis()) {
-            viewModel.updateExchangeRates()
-        }
-    }
+    val exchangeRateUpdateState by viewModel.exchangeRateUpdateState.collectAsStateWithLifecycle()
 
     ConverterScreenLayout(
-        timer = timer,
+        exchangeRateUpdateState = exchangeRateUpdateState,
         selectedCurrency = selectedCurrency?.symbol,
         exchangeRates = exchangeRates,
         onAmountValueChange = viewModel::setInputAmount,
-        onCurrencySelected = viewModel::setSelectedCurrency
+        onCurrencySelected = viewModel::setSelectedCurrency,
+        onRetryClick = viewModel::startExchangeRateUpdater
     )
 }
 
 @Composable
 fun ConverterScreenLayout(
-    timer: String?,
+    exchangeRateUpdateState: ExchangeRateUpdateState,
     selectedCurrency: String?,
     exchangeRates: List<ExchangeRate>,
     onAmountValueChange: (String) -> Unit,
-    onCurrencySelected: (ExchangeRate) -> Unit
+    onCurrencySelected: (ExchangeRate) -> Unit,
+    onRetryClick: () -> Unit
 ) {
     var showSelector by remember { mutableStateOf(false) }
 
@@ -79,9 +76,22 @@ fun ConverterScreenLayout(
             initialValue = "",
             onValueChange = onAmountValueChange
         )
-
-        AnimatedVisibility(visible = timer != null) {
-            timer?.let { Text(text = "Updating exchange rates in $it") }
+        when (exchangeRateUpdateState) {
+            is ExchangeRateUpdateState.Error -> Text(
+                modifier = Modifier.clickable(onClick = onRetryClick),
+                text = "Update failed. Try Again.",
+                color = MaterialTheme.colors.primary
+            )
+            is ExchangeRateUpdateState.Success -> Icon(
+                imageVector = SuccessIcon,
+                contentDescription = "Success",
+                tint = MaterialTheme.colors.primary,
+                modifier = Modifier.size(20.dp)
+            )
+            is ExchangeRateUpdateState.Timer -> Text(
+                text = "Updating exchange rates in ${exchangeRateUpdateState.time}"
+            )
+            is ExchangeRateUpdateState.Updating -> CircularProgressIndicator(Modifier.size(16.dp))
         }
 
         AnimatedVisibility(
@@ -133,11 +143,12 @@ fun InputField(
 fun ConverterScreenPreview() {
     KyawHtetZawTheme {
         ConverterScreenLayout(
-            timer = "",
+            selectedCurrency = null,
             exchangeRates = emptyList(),
             onAmountValueChange = {},
-            selectedCurrency = null,
-            onCurrencySelected = {}
+            onCurrencySelected = {},
+            exchangeRateUpdateState = ExchangeRateUpdateState.Updating,
+            onRetryClick = {}
         )
     }
 }

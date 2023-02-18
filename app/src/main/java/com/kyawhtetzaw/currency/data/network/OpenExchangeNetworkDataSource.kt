@@ -1,8 +1,8 @@
 package com.kyawhtetzaw.currency.data.network
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import com.kyawhtetzaw.currency.BaseCurrency
 import com.kyawhtetzaw.currency.BuildConfig
+import com.kyawhtetzaw.currency.Config
 import com.kyawhtetzaw.currency.data.network.model.NetworkExchangeRates
 import com.kyawhtetzaw.currency.data.network.model.NetworkResponse
 import javax.inject.Inject
@@ -56,7 +56,7 @@ class OpenExchangeNetworkDataSource @Inject constructor(json: Json) : NetworkDat
     }
 
     override suspend fun latest(): NetworkExchangeRates {
-        return api.latest(baseCurrency = BaseCurrency).rates
+        return api.latest(baseCurrency = Config.BaseCurrency).rates
     }
 
 }

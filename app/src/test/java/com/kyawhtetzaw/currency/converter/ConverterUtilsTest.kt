@@ -4,69 +4,78 @@ import junit.framework.TestCase.assertEquals
 import org.junit.Test
 
 internal class ConverterUtilsKtTest {
+    val base = "USD"
 
     @Test
-    fun convertRate_sameCurrency_returnsSameAmount() {
-        val from = "JPY"
-        val to = "JPY"
-        val base = "USD"
-        val result = convertRate(
-            amount = 100.0,
-            fromRate = 120.0,
-            from = from,
-            to = to,
-            toRate = 56.0,
-            base = base
-        )
+    fun `converting same currency returns original amount`() {
+        val amount = 100.0
+        val from = "USD"
+        val to = "USD"
+        val fromRate = 1.0
+        val toRate = 1.0
+
+        val result = convertRate(amount, fromRate, toRate, from, to, base)
+
         val expected = CurrencyConversionResult(
-            symbol = "JPY",
+            symbol = to,
             rate = 1.0,
-            amount = 100.0
+            amount = amount
         )
+
         assertEquals(expected, result)
     }
 
     @Test
-    fun convertRate_differentCurrencies_butToCurrencyIsNotSameWithBase() {
-        val result = convertRate(
-            amount = 100.0,
-            fromRate =  1.338195,
-            from = "SGD",
-            to = "JPY",
-            toRate = 134.35083,
-            base = "USD"
-        )
-        
-        val expected = CurrencyConversionResult(
-            symbol = "JPY",
-            rate = 100.3970497573224,
-            amount = 10039.70522
-        )
+    fun `converts amount correctly when converting from base currency to another currency`() {        // given
+        val amount = 100.0
+        val from = "USD"
+        val to = "EUR"
+        val fromRate = 1.0
+        val toRate = 0.85
 
-        assertEquals(expected.symbol, result.symbol)
-        assertEquals(expected.rate, result.rate, 0.1)
-        assertEquals(expected.amount, result.amount, 0.1)
+        val result = convertRate(amount, fromRate, toRate, from, to, base)
+
+        val expect = CurrencyConversionResult(
+            symbol = to,
+            rate = toRate,
+            amount = toRate * amount
+        )
+        assertEquals(expect, result)
     }
 
     @Test
-    fun convertRate_differentCurrencies_butToSameWithBase() {
-        val result = convertRate(
-            amount = 100.0,
-            fromRate = 1.0,
-            from = "USD",
-            to = "JPY",
-            toRate = 133.95255,
-            base = "USD"
-        )
+    fun `converts amount correctly when converting to base currency from another currency`() {
+        val amount = 100.0
+        val from = "EUR"
+        val to = "USD"
+        val fromRate = 1.18
+        val toRate = 1.0
 
-        val expected = CurrencyConversionResult(
-            symbol = "JPY",
-            rate = 133.95255,
-            amount = 13395.255
-        )
+        val result = convertRate(amount, fromRate, toRate, from, to, base)
 
-        assertEquals(expected.symbol, result.symbol)
-        assertEquals(expected.rate, result.rate, 0.1)
-        assertEquals(expected.amount, result.amount, 0.1)
+        val expect = CurrencyConversionResult(
+            symbol = to,
+            rate = toRate,
+            amount = toRate * amount
+        )
+        assertEquals(expect, result)
+    }
+
+    @Test
+    fun `converts amount correctly when converting between two non-base currencies`() {
+        val amount = 100.0
+        val from = "GBP"
+        val to = "CAD"
+        val fromRate = 1.39
+        val toRate = 1.25
+
+        val result = convertRate(amount, fromRate, toRate, from, to, base)
+
+        val expect = CurrencyConversionResult(
+            symbol = to,
+            rate = toRate / fromRate,
+            amount = (toRate / fromRate) * amount
+        )
+        assertEquals(expect, result)
     }
 }

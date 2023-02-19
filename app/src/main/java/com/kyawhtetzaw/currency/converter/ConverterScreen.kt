@@ -2,17 +2,33 @@ package com.kyawhtetzaw.currency.converter
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -23,7 +39,9 @@ import com.kyawhtetzaw.currency.model.ExchangeRate
 import com.kyawhtetzaw.currency.ui.icons.SuccessIcon
 import com.kyawhtetzaw.currency.ui.theme.KyawHtetZawTheme
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
 fun ConverterScreen(
@@ -125,11 +143,12 @@ private fun ErrorView(onRetryClick: () -> Unit) {
     )
 }
 
-@OptIn(FlowPreview::class)
+@OptIn(FlowPreview::class, ExperimentalComposeUiApi::class)
 @Composable
 fun InputField(
     modifier: Modifier = Modifier, initialValue: String?, onValueChange: (String) -> Unit
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
     var inputValue by remember { mutableStateOf(initialValue.orEmpty()) }
 
     LaunchedEffect(inputValue) {
@@ -137,11 +156,23 @@ fun InputField(
             .collectLatest(onValueChange)
     }
 
-    OutlinedTextField(modifier = modifier, value = inputValue, onValueChange = { newValue ->
-        if (newValue.isEmpty() || newValue.toDoubleOrNull() != null) {
-            inputValue = newValue
-        }
-    }, placeholder = { Text(text = "Amount") })
+    OutlinedTextField(
+        modifier = modifier,
+        value = inputValue,
+        onValueChange = { newValue ->
+            if (newValue.isEmpty() || newValue.toDoubleOrNull() != null) {
+                inputValue = newValue
+            }
+        },
+        placeholder = { Text(text = "Amount") },
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Decimal,
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = { keyboardController?.hide() }
+        )
+    )
 }
 
 @Preview(showBackground = true)

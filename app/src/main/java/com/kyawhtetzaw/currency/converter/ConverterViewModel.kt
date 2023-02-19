@@ -45,7 +45,7 @@ class ConverterViewModel @Inject constructor(
                     convertRate(
                         amount = amount,
                         fromRate = source.rate,
-                        targetRate = to.rate,
+                        toRate = to.rate,
                         from = source.symbol,
                         to = to.symbol,
                         base = Config.BaseCurrency

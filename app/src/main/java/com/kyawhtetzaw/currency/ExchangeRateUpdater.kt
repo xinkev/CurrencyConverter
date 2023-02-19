@@ -77,16 +77,8 @@ class ExchangeRateUpdater @Inject constructor(
     }
 
     private suspend fun updateExchangeRates(): Result<Unit> = runCatching {
-        val now = LocalDateTime.now()
-        val shouldUpdate = lastUpdateDataSource.getLastUpdateTime()?.let {
-            ChronoUnit.MINUTES.between(it, now) >= 30
-        } ?: true
-
-        if (shouldUpdate) {
-            val networkRates = networkDataSource.latest()
-            dao.insert(*networkRates.map(NetworkExchangeRate::toEntity).toTypedArray())
-            lastUpdateDataSource.saveTimestamp(now)
-        }
+        val networkRates = networkDataSource.latest()
+        dao.insert(*networkRates.map(NetworkExchangeRate::toEntity).toTypedArray())
     }
 }
 

@@ -25,40 +25,37 @@ class ConverterViewModel @Inject constructor(
 ) : ViewModel() {
     private val inputAmount = MutableStateFlow(0.0)
 
-    private val _selectedCurrency = MutableStateFlow<ExchangeRate?>(null)
-    val selectedCurrency = _selectedCurrency.asStateFlow()
-
-    private val _exchangeRateUpdateState =
-        MutableStateFlow<ExchangeRateUpdateState>(ExchangeRateUpdateState.Updating)
-    val exchangeRateUpdateState = _exchangeRateUpdateState.asStateFlow()
-
-    private val exchangeRates = getExchangeRates().stateIn(
+    val exchangeRates = getExchangeRates().stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(500),
         emptyList()
     )
 
+    private val _selectedExchangeRate: MutableStateFlow<ExchangeRate?> = MutableStateFlow(null)
+    val selectedCurrency = _selectedExchangeRate.asStateFlow()
+
+    private val _exchangeRateUpdateState =
+        MutableStateFlow<ExchangeRateUpdateState>(ExchangeRateUpdateState.Updating)
+    val exchangeRateUpdateState = _exchangeRateUpdateState.asStateFlow()
+
     val convertedRates =
         combine(inputAmount, exchangeRates, selectedCurrency) { amount, rates, source ->
             if (rates.isNotEmpty() && source != null) {
-                val from = rates.first { it.symbol == source.symbol }
                 rates.map { to ->
-                    to.copy(
-                        rate = convertRate(
-                            amount = amount,
-                            rate = from.rate,
-                            targetRate = to.rate,
-                            from = from.symbol,
-                            to = to.symbol,
-                            base = Config.BaseCurrency
-                        )
+                    convertRate(
+                        amount = amount,
+                        fromRate = source.rate,
+                        targetRate = to.rate,
+                        from = source.symbol,
+                        to = to.symbol,
+                        base = Config.BaseCurrency
                     )
                 }
-            } else rates
+            } else emptyList()
         }.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(500),
-            exchangeRates.value
+            emptyList()
         )
 
     init {
@@ -68,11 +65,12 @@ class ConverterViewModel @Inject constructor(
     fun startExchangeRateUpdater() {
         viewModelScope.launch {
             exchangeRateUpdater.start(Config.WaitInterval)
-                .collect {newState ->
+                .collect { newState ->
                     _exchangeRateUpdateState.update { newState }
                 }
         }
     }
+
     fun setInputAmount(value: String) {
         inputAmount.update { oldValue ->
             if (value.isEmpty()) {
@@ -84,6 +82,6 @@ class ConverterViewModel @Inject constructor(
     }
 
     fun setSelectedCurrency(value: ExchangeRate) {
-        _selectedCurrency.update { value }
+        _selectedExchangeRate.update { value }
     }
 }

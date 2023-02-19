@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Currency</string>
+    <string name="lbl_update_failed">Update failed. Click this to try again.</string>
+    <string name="lbl_update_count_down">Updating exchange rates in %s</string>
+    <string name="lbl_select_currency">Select a currency</string>
 </resources>

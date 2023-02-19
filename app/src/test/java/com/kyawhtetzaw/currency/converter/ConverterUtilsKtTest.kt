@@ -12,7 +12,7 @@ internal class ConverterUtilsKtTest {
         val base = "USD"
         val result = convertRate(
             amount = 100.0,
-            rate = 120.0,
+            fromRate = 120.0,
             from = from,
             to = to,
             targetRate = 56.0,
@@ -33,7 +33,7 @@ internal class ConverterUtilsKtTest {
 
         val result1 = convertRate(
             amount = amount,
-            rate = sourceRate,
+            fromRate = sourceRate,
             from = source,
             to = target,
             targetRate = targetRate,
@@ -55,7 +55,7 @@ internal class ConverterUtilsKtTest {
 
         val result2 = convertRate(
             amount = amount,
-            rate = sourceRate,
+            fromRate = sourceRate,
             from = source,
             to = target,
             targetRate = targetRate,

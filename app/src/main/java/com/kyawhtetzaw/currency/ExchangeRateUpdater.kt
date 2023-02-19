@@ -19,6 +19,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
+/**
+ * This class periodically updates exchange rates based on a saved timestamp that is only updated
+ * when the task is successful. If the specified duration has elapsed since the last update,
+ * the class will update the local cache with the latest exchange rates.
+ */
 class ExchangeRateUpdater @Inject constructor(
     private val lastUpdateDataSource: LastUpdateDataSource,
     private val networkDataSource: NetworkDataSource,
@@ -32,12 +37,12 @@ class ExchangeRateUpdater @Inject constructor(
     ): Flow<ExchangeRateUpdateState> = flow {
         val durationInSeconds = duration.inWholeSeconds
 
-        var timePassed = lastUpdateDataSource.getLastUpdateTime()?.let {
+        var elapsedTime = lastUpdateDataSource.getLastUpdateTime()?.let {
             ChronoUnit.SECONDS.between(it, LocalDateTime.now())
         }
 
         while (true) {
-            val allowToUpdate = timePassed == null || timePassed > durationInSeconds
+            val allowToUpdate = elapsedTime == null || elapsedTime > durationInSeconds
             if (allowToUpdate) {
                 emit(Updating)
                 val result = updateExchangeRates()
@@ -46,7 +51,7 @@ class ExchangeRateUpdater @Inject constructor(
                     emit(Success)
 
                     // reset the time passed
-                    timePassed = 0
+                    elapsedTime = 0
                     continue
                 } else {
                     val errorMessage = result.exceptionOrNull()?.message ?: "Something went wrong."
@@ -57,10 +62,10 @@ class ExchangeRateUpdater @Inject constructor(
             } else {
                 delay(1.seconds)
 
-                val time = formatTimer(durationInSeconds - timePassed!!)
+                val time = formatTimer(durationInSeconds - elapsedTime!!)
                 emit(Timer(time))
 
-                timePassed += 1L
+                elapsedTime += 1L
             }
         }
     }

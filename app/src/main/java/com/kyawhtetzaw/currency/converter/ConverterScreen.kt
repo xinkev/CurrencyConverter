@@ -31,7 +31,7 @@ fun ConverterScreen(
 ) {
     val conversionResults by viewModel.convertedRates.collectAsStateWithLifecycle()
     val selectedCurrency by viewModel.selectedCurrency.collectAsStateWithLifecycle()
-    val exchangeRateUpdateState by viewModel.exchangeRateUpdateState.collectAsStateWithLifecycle()
+    val exchangeRateUpdateState = viewModel.exchangeRateUpdateState.collectAsStateWithLifecycle()
     val exchangeRates by viewModel.exchangeRates.collectAsStateWithLifecycle()
 
     ConverterScreenLayout(
@@ -48,7 +48,7 @@ fun ConverterScreen(
 @Composable
 fun ConverterScreenLayout(
     exchangeRates: List<ExchangeRate>,
-    exchangeRateUpdateState: ExchangeRateUpdateState,
+    exchangeRateUpdateState: State<ExchangeRateUpdateState>,
     selectedCurrency: String?,
     conversionResults: List<CurrencyConversionResult>,
     onAmountValueChange: (String) -> Unit,
@@ -71,12 +71,7 @@ fun ConverterScreenLayout(
                 initialValue = "",
                 onValueChange = onAmountValueChange
             )
-            when (exchangeRateUpdateState) {
-                is ExchangeRateUpdateState.Error -> ErrorView(onRetryClick)
-                is ExchangeRateUpdateState.Success -> SuccessView()
-                is ExchangeRateUpdateState.Timer -> CountDownView(exchangeRateUpdateState)
-                is ExchangeRateUpdateState.Updating -> CircularProgressIndicator(Modifier.size(16.dp))
-            }
+            UpdateTimerView(exchangeRateUpdateState, onRetryClick)
         }
 
         Card(
@@ -85,6 +80,19 @@ fun ConverterScreenLayout(
         ) {
             ConversionResults(conversionResults)
         }
+    }
+}
+
+@Composable
+private fun UpdateTimerView(
+    exchangeRateUpdateState: State<ExchangeRateUpdateState>,
+    onRetryClick: () -> Unit
+) {
+    when (val state = exchangeRateUpdateState.value) {
+        is ExchangeRateUpdateState.Error -> ErrorView(onRetryClick)
+        is ExchangeRateUpdateState.Success -> SuccessView()
+        is ExchangeRateUpdateState.Timer -> CountDownView(state)
+        is ExchangeRateUpdateState.Updating -> CircularProgressIndicator(Modifier.size(16.dp))
     }
 }
 
@@ -140,6 +148,7 @@ fun InputField(
 @Composable
 fun ConverterScreenPreview() {
     val currencies = listOf(ExchangeRate("USD", 1.0), ExchangeRate("HKD", 11.0))
+    val updateState = remember { mutableStateOf(ExchangeRateUpdateState.Updating) }
     KyawHtetZawTheme {
         ConverterScreenLayout(
             selectedCurrency = "USD",
@@ -147,7 +156,7 @@ fun ConverterScreenPreview() {
             exchangeRates = currencies,
             onAmountValueChange = {},
             onCurrencySelect = {},
-            exchangeRateUpdateState = ExchangeRateUpdateState.Error("error..."),
+            exchangeRateUpdateState = updateState,
             onRetryClick = {}
         )
     }

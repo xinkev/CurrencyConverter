@@ -4,7 +4,7 @@ package com.kyawhtetzaw.currency.converter
  *
  * @param amount amount to convert
  * @param fromRate exchange rate for the currency that is being converted [from]
- * @param targetRate exchange rate for the currency that is being converted in[to]
+ * @param toRate exchange rate for the currency that is being converted in[to]
  * @param from the currency to convert the amount from
  * @param to the currency to convert the amount into
  * @param base the currency which is used to get the exchange rate data from the API. Currently, it's set to hard coded as USD. You can change it in Config.kt
@@ -12,7 +12,7 @@ package com.kyawhtetzaw.currency.converter
 fun convertRate(
     amount: Double,
     fromRate: Double,
-    targetRate: Double,
+    toRate: Double,
     from: String,
     to: String,
     base: String,
@@ -28,11 +28,11 @@ fun convertRate(
         if (base.equals(to, true)) {
             CurrencyConversionResult(
                 symbol = to,
-                rate = targetRate,
-                amount = targetRate * amount
+                rate = toRate,
+                amount = toRate * amount
             )
         } else {
-            val rate = targetRate / fromRate
+            val rate = toRate / fromRate
             CurrencyConversionResult(
                 symbol = to,
                 rate = rate,

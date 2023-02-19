@@ -1,13 +1,14 @@
 package com.kyawhtetzaw.currency.converter
 
 /**
+ * Convert the amount given from [from] currency to [to] currency.
  *
  * @param amount amount to convert
  * @param fromRate exchange rate for the currency that is being converted [from], based on [base] currency
  * @param toRate exchange rate for the currency that is being converted in[to], based on [base] currency
  * @param from the currency to convert the amount from
  * @param to the currency to convert the amount into
- * @param base the currency which is used to get the exchange rate data from the API. Currently, it's set to hard coded as USD. You can change it in Config.kt
+ * @param base the currency which is used to get the exchange rate data from the API. Currently, it's hard coded as USD. You can change it in Config.kt
  */
 fun convertRate(
     amount: Double,

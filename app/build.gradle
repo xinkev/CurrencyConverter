@@ -76,6 +76,9 @@ dependencies {
     kapt libs.lifecycle.compiler
 
     testImplementation libs.junit
+    testImplementation libs.bundles.mockk
+    testImplementation libs.kotlin.coroutines.test
+
     androidTestImplementation libs.android.junit
     androidTestImplementation libs.expresso
     debugImplementation libs.compose.ui.tooling

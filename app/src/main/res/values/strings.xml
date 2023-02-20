@@ -7,4 +7,5 @@
     <string name="cancel">Cancel</string>
     <string name="amount_input_placeholder">Amount</string>
     <string name="amount_input_content_description">Amount Input</string>
+    <string name="success_icon_content_description">Success</string>
 </resources>

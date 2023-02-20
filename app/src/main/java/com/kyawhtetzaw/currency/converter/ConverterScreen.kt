@@ -1,16 +1,10 @@
 package com.kyawhtetzaw.currency.converter
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -18,15 +12,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kyawhtetzaw.currency.ExchangeRateUpdateState
-import com.kyawhtetzaw.currency.R
 import com.kyawhtetzaw.currency.model.ExchangeRate
-import com.kyawhtetzaw.currency.ui.icons.SuccessIcon
 import com.kyawhtetzaw.currency.ui.theme.KyawHtetZawTheme
 
 @Composable
@@ -75,7 +66,10 @@ fun ConverterScreenLayout(
                 initialValue = "",
                 onValueChange = onAmountValueChange
             )
-            UpdateTimerView(exchangeRateUpdateState, onRetryClick)
+            UpdateTimerView(
+                exchangeRateUpdateState = exchangeRateUpdateState,
+                onRetryClick = onRetryClick
+            )
         }
 
         Card(
@@ -87,47 +81,6 @@ fun ConverterScreenLayout(
     }
 }
 
-@Composable
-private fun UpdateTimerView(
-    exchangeRateUpdateState: State<ExchangeRateUpdateState>,
-    onRetryClick: () -> Unit
-) {
-    when (val state = exchangeRateUpdateState.value) {
-        is ExchangeRateUpdateState.Error -> ErrorView(onRetryClick)
-        is ExchangeRateUpdateState.Success -> SuccessView()
-        is ExchangeRateUpdateState.Timer -> CountDownView(state)
-        is ExchangeRateUpdateState.Updating -> CircularProgressIndicator(Modifier.size(16.dp))
-    }
-}
-
-@Composable
-private fun CountDownView(exchangeRateUpdateState: ExchangeRateUpdateState.Timer) {
-    Text(
-        text = stringResource(
-            id = R.string.lbl_update_count_down,
-            exchangeRateUpdateState.time
-        )
-    )
-}
-
-@Composable
-private fun SuccessView() {
-    Icon(
-        imageVector = SuccessIcon,
-        contentDescription = "Success",
-        tint = MaterialTheme.colors.primary,
-        modifier = Modifier.size(20.dp)
-    )
-}
-
-@Composable
-private fun ErrorView(onRetryClick: () -> Unit) {
-    Text(
-        modifier = Modifier.clickable(onClick = onRetryClick),
-        text = stringResource(R.string.lbl_update_failed),
-        color = MaterialTheme.colors.primary
-    )
-}
 
 @Preview(showBackground = true)
 @Composable

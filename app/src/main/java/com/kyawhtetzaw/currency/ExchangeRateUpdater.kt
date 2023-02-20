@@ -13,8 +13,6 @@ import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -57,7 +55,7 @@ class ExchangeRateUpdater @Inject constructor(
                     val errorMessage = result.exceptionOrNull()?.message ?: "Something went wrong."
                     emit(ExchangeRateUpdateState.Error(errorMessage))
 
-                    currentCoroutineContext().cancel()
+                    break
                 }
             } else {
                 delay(1.seconds)

@@ -12,21 +12,13 @@ import io.mockk.just
 import io.mockk.mockk
 import java.time.LocalDateTime
 import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertTrue
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.awaitCancellation
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertNotEquals
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -43,7 +35,7 @@ internal class ExchangeRateUpdaterTest {
     }
 
     @Test
-    fun `start emits Updating state when the last update time is null`() = runTest {
+    fun `start() emits Updating state when the last update time is null`() = runTest {
         coEvery { lastUpdateDataSource.getLastUpdateTime() } returns null
 
         val result = updater.start(10.seconds).take(1).toList()
@@ -53,7 +45,7 @@ internal class ExchangeRateUpdaterTest {
     }
 
     @Test
-    fun `start emits Updating state when time since last update is greater than duration`() =
+    fun `start() emits Updating state when time since last update is greater than duration`() =
         runTest {
             coEvery { lastUpdateDataSource.getLastUpdateTime() } returns LocalDateTime.now()
                 .minusSeconds(20)
@@ -65,7 +57,7 @@ internal class ExchangeRateUpdaterTest {
         }
 
     @Test
-    fun `start emits Timer state when time since last update is less than duration`() = runTest {
+    fun `start() emits Timer state when time since last update is less than duration`() = runTest {
         coEvery { lastUpdateDataSource.getLastUpdateTime() } returns LocalDateTime.now()
             .minusSeconds(5)
 
@@ -76,7 +68,7 @@ internal class ExchangeRateUpdaterTest {
     }
 
     @Test
-    fun `start emits Success state when network request is successful`() = runTest {
+    fun `start() emits Success state when network request is successful`() = runTest {
         coEvery { lastUpdateDataSource.getLastUpdateTime() } returns LocalDateTime.now()
             .minusSeconds(20)
         coEvery { networkDataSource.latest() } returns mapOf("EUR" to 0.85, "GBP" to 0.73)
@@ -89,7 +81,7 @@ internal class ExchangeRateUpdaterTest {
     }
 
     @Test
-    fun `start emits Error state when network request fails`() = runTest {
+    fun `start() emits Error state when network request fails`() = runTest {
         coEvery { lastUpdateDataSource.getLastUpdateTime() } returns LocalDateTime.now()
             .minusSeconds(20)
         val errorMessage = "Something went wrong."
@@ -99,5 +91,36 @@ internal class ExchangeRateUpdaterTest {
         val expected = listOf(Updating, ExchangeRateUpdateState.Error(errorMessage))
 
         assertEquals(expected, result)
+    }
+
+    @Test
+    fun `start() should not continue network request fails`() = runTest {
+        coEvery { lastUpdateDataSource.getLastUpdateTime() } returns LocalDateTime.now()
+            .minusSeconds(20)
+        val errorMessage = "Something went wrong."
+        coEvery { networkDataSource.latest() } throws Exception(errorMessage)
+
+        val result = updater.start(10.seconds).take(2).toList()
+        val expected = listOf(Updating, ExchangeRateUpdateState.Error(errorMessage))
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `test start() when updateExchangeRates fails, flow stops`() = runTest {
+        val error = "network error"
+        coEvery { lastUpdateDataSource.getLastUpdateTime() } returns null
+        coEvery { networkDataSource.latest() } throws Exception(error)
+
+        val result = updater.start(1.seconds).take(3).toList()
+        val expected = listOf(Updating, ExchangeRateUpdateState.Error(error))
+
+        val unExpected = listOf(Updating, ExchangeRateUpdateState.Error(error), Timer("00:01"))
+
+        assertEquals(
+            expected,
+            result
+        )
+        assertNotEquals(unExpected, result)
     }
 }

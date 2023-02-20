@@ -79,8 +79,11 @@ dependencies {
     testImplementation libs.bundles.mockk
     testImplementation libs.kotlin.coroutines.test
 
+    androidTestImplementation libs.turbine
+    androidTestImplementation libs.kotlin.coroutines.test
     androidTestImplementation libs.android.junit
     androidTestImplementation libs.expresso
+
     debugImplementation libs.compose.ui.tooling
 }
 

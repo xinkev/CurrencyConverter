@@ -23,7 +23,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -46,7 +48,11 @@ fun CurrencyChooser(
         onSelect = onSelect
     )
 
-    Row(modifier = Modifier.clickable(onClick = { showSelector = true })) {
+    Row(
+        modifier = Modifier
+            .clickable(onClick = { showSelector = true }, role = Role.Button)
+            .testTag("selectCurrencyButton")
+    ) {
         Text(
             text = selectedCurrency ?: stringResource(R.string.lbl_select_currency),
             color = MaterialTheme.colors.primary

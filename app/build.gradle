@@ -58,6 +58,8 @@ android {
 }
 
 dependencies {
+    implementation platform(libs.compose.bom)
+
     implementation libs.android.core
     implementation libs.activity.compose
     implementation libs.kotlin.serialization
@@ -71,6 +73,7 @@ dependencies {
     implementation libs.bundles.retrofit
     implementation libs.bundles.okhttp
 
+
     kapt libs.hilt.compiler
     kapt libs.room.compiler
     kapt libs.lifecycle.compiler
@@ -79,11 +82,13 @@ dependencies {
     testImplementation libs.bundles.mockk
     testImplementation libs.kotlin.coroutines.test
 
+    androidTestImplementation libs.compose.ui.test.junit4
     androidTestImplementation libs.turbine
     androidTestImplementation libs.kotlin.coroutines.test
     androidTestImplementation libs.android.junit
     androidTestImplementation libs.expresso
 
+    debugImplementation libs.compose.ui.test.manifest
     debugImplementation libs.compose.ui.tooling
 }
 

@@ -5,4 +5,6 @@
     <string name="lbl_select_currency">Select a currency</string>
     <string name="choose_a_currency">Choose a currency</string>
     <string name="cancel">Cancel</string>
+    <string name="amount_input_placeholder">Amount</string>
+    <string name="amount_input_content_description">Amount Input</string>
 </resources>

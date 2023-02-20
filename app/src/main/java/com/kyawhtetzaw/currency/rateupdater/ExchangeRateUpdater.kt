@@ -22,15 +22,20 @@ import kotlinx.coroutines.flow.flow
  * when the task is successful. If the specified duration has elapsed since the last update,
  * the class will update the local cache with the latest exchange rates.
  */
-class ExchangeRateUpdater @Inject constructor(
-    private val lastUpdateDataSource: LastUpdateDataSource,
-    private val networkDataSource: NetworkDataSource,
-    private val dao: ExchangeRateDao
-) {
+
+interface ExchangeRateUpdater {
     /**
      * @param duration amount of time to hold of the update
      */
-    fun start(
+    fun start(duration: Duration): Flow<ExchangeRateUpdateState>
+}
+
+class ExchangeRateUpdaterImpl @Inject constructor(
+    private val lastUpdateDataSource: LastUpdateDataSource,
+    private val networkDataSource: NetworkDataSource,
+    private val dao: ExchangeRateDao
+) : ExchangeRateUpdater {
+    override fun start(
         duration: Duration
     ): Flow<ExchangeRateUpdateState> = flow {
         val durationInSeconds = duration.inWholeSeconds
@@ -47,9 +52,9 @@ class ExchangeRateUpdater @Inject constructor(
 
                 if (result.isSuccess) {
                     emit(Success)
-
                     // reset the time passed
                     elapsedTime = 0
+
                     continue
                 } else {
                     val errorMessage = result.exceptionOrNull()?.message ?: "Something went wrong."

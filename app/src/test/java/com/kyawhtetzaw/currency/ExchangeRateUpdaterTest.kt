@@ -31,7 +31,7 @@ internal class ExchangeRateUpdaterTest {
 
     @Before
     fun setup() {
-        updater = ExchangeRateUpdater(lastUpdateDataSource, networkDataSource, dao)
+        updater = ExchangeRateUpdaterImpl(lastUpdateDataSource, networkDataSource, dao)
     }
 
     @Test

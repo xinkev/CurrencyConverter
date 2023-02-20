@@ -48,7 +48,7 @@ class ExchangeRateUpdaterInstrumentedTest {
                 mapOf("EUR" to 0.85, "GBP" to 0.73)
 
         }
-        updater = ExchangeRateUpdater(lastUpdateDataSource, networkDataSource, dao)
+        updater = ExchangeRateUpdaterImpl(lastUpdateDataSource, networkDataSource, dao)
     }
 
     @After
